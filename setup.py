@@ -7,11 +7,12 @@ use_setuptools()
 import os
 import glob
 from setuptools import setup, find_packages, Extension
+from setuptools import Command
 from warnings import warn
 
 import astropy
 from astropy.version_helper import _get_git_devstr, _generate_version_py
-
+from astropy.tests import helper
 
 VERSION = '0.0dev'
 RELEASE = not VERSION.endswith('dev')
@@ -141,7 +142,26 @@ except ImportError:  # Sphinx not present
     pass
 
 
+# Create setuptools test command, so that tests can be run using
+# python setup.py test.
+# Code copied from py.test webpage and modified.
+class PyTest(Command):
+    user_options = []
 
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        errno = helper.run_tests()
+        raise SystemExit(errno)
+
+if cmdclassd:
+    cmdclassd['test'] = PyTest
+else:
+    cmdclassd = dict(test=PyTest)
 
 setup(name='astropy',
       version=VERSION,
